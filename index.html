@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandhya Vandana Times - Auckland</title>
+    <meta name="description" content="Calculate Sandhya Vandana times according to Gaudiya calendar for Auckland">
+    <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;Sandhya Vandana Auckland&quot;,&quot;short_name&quot;:&quot;Sandhya&quot;,&quot;start_url&quot;:&quot;./&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#1a1a2e&quot;,&quot;theme_color&quot;:&quot;#ffd700&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23ffd700'/%3E%3Ctext x='50' y='60' font-family='serif' font-size='30' fill='%23000' text-anchor='middle'%3EOm%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffd700;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .om-symbol {
+            font-size: 2.5em;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 1.4em;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 0.9em;
+            color: #f0f0f0;
+            opacity: 0.8;
+        }
+
+        .date-display {
+            text-align: center;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .current-date {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .vedic-date {
+            font-size: 0.9em;
+            color: #f0f0f0;
+            opacity: 0.9;
+        }
+
+        .sandhya-times {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sandhya-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 4px solid #ffd700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .sandhya-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .sandhya-item.active {
+            background: rgba(255, 215, 0, 0.1);
+            border-left-color: #fff;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .sandhya-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+
+        .sandhya-sanskrit {
+            font-size: 0.8em;
+            color: #f0f0f0;
+            opacity: 0.7;
+            margin-bottom: 8px;
+        }
+
+        .time-range {
+            font-size: 1em;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .time-info {
+            font-size: 0.8em;
+            color: #f0f0f0;
+            opacity: 0.8;
+        }
+
+        .next-update {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.8em;
+            color: #f0f0f0;
+            opacity: 0.7;
+        }
+
+        .refresh-btn, .alarm-btn {
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .refresh-btn:hover, .alarm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .alarm-settings {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .alarm-settings h3 {
+            margin-bottom: 15px;
+            color: #ffd700;
+            font-size: 1.1em;
+        }
+
+        .alarm-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .alarm-label {
+            font-size: 0.9em;
+            color: #f0f0f0;
+        }
+
+        .alarm-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .alarm-offset {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+            padding: 5px 10px;
+            border-radius: 5px;
+            width: 60px;
+            font-size: 0.8em;
+        }
+
+        .alarm-toggle {
+            background: #666;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background 0.3s;
+        }
+
+        .alarm-toggle.active {
+            background: #4CAF50;
+        }
+
+        .notification-status {
+            text-align: center;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+
+        .notification-status.granted {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .notification-status.denied {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+
+        .notification-status.default {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .current-time {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .om-symbol {
+                font-size: 2em;
+            }
+            
+            h1 {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="om-symbol">ॐ</div>
+            <h1>Sandhya Vandana Times</h1>
+            <div class="subtitle">Auckland, New Zealand</div>
+        </div>
+
+        <div class="date-display">
+            <div class="current-date" id="currentDate"></div>
+            <div class="vedic-date" id="vedicDate"></div>
+        </div>
+
+        <div class="current-time" id="currentTime"></div>
+
+        <div class="sandhya-times">
+            <div class="sandhya-item" id="pratah">
+                <div class="sandhya-name">Prātaḥ Sandhya</div>
+                <div class="sandhya-sanskrit">प्रातः संध्या</div>
+                <div class="time-range" id="pratahTime"></div>
+                <div class="time-info">Dawn to Sunrise period</div>
+            </div>
+
+            <div class="sandhya-item" id="madhyahna">
+                <div class="sandhya-name">Mādhyāhnika Sandhya</div>
+                <div class="sandhya-sanskrit">माध्याह्निक संध्या</div>
+                <div class="time-range" id="madhyahnaTime"></div>
+                <div class="time-info">Solar noon period</div>
+            </div>
+
+            <div class="sandhya-item" id="sayam">
+                <div class="sandhya-name">Sāyaṃ Sandhya</div>
+                <div class="sandhya-sanskrit">सायं संध्या</div>
+                <div class="time-range" id="sayamTime"></div>
+                <div class="time-info">Sunset to twilight period</div>
+            </div>
+        </div>
+
+        <button class="refresh-btn" onclick="updateAllTimes()">
+            🔄 Refresh Times
+        </button>
+
+        <div class="alarm-settings">
+            <h3>🔔 Sandhya Alarms</h3>
+            
+            <div class="alarm-row">
+                <div class="alarm-label">Prātaḥ Sandhya</div>
+                <div class="alarm-controls">
+                    <input type="number" class="alarm-offset" id="pratahOffset" value="-15" min="-60" max="60">
+                    <span style="font-size: 0.8em;">min</span>
+                    <button class="alarm-toggle" id="pratahToggle" onclick="toggleAlarm('pratah')">OFF</button>
+                </div>
+            </div>
+
+            <div class="alarm-row">
+                <div class="alarm-label">Mādhyāhnika Sandhya</div>
+                <div class="alarm-controls">
+                    <input type="number" class="alarm-offset" id="madhyahnaOffset" value="-5" min="-60" max="60">
+                    <span style="font-size: 0.8em;">min</span>
+                    <button class="alarm-toggle" id="madhyahnaToggle" onclick="toggleAlarm('madhyahna')">OFF</button>
+                </div>
+            </div>
+
+            <div class="alarm-row">
+                <div class="alarm-label">Sāyaṃ Sandhya</div>
+                <div class="alarm-controls">
+                    <input type="number" class="alarm-offset" id="sayamOffset" value="-10" min="-60" max="60">
+                    <span style="font-size: 0.8em;">min</span>
+                    <button class="alarm-toggle" id="sayamToggle" onclick="toggleAlarm('sayam')">OFF</button>
+                </div>
+            </div>
+
+            <button class="alarm-btn" onclick="requestNotificationPermission()">
+                🔔 Enable Notifications
+            </button>
+
+            <div class="notification-status" id="notificationStatus"></div>
+        </div>
+
+        <div class="next-update">
+            <div id="nextUpdate"></div>
+        </div>
+    </div>
+
+    <script>
+        // Auckland coordinates
+        const LATITUDE = -36.8485;
+        const LONGITUDE = 174.7633;
+
+        // Global variables for alarms
+        let alarmSettings = {
+            pratah: { enabled: false, offset: -15 },
+            madhyahna: { enabled: false, offset: -5 },
+            sayam: { enabled: false, offset: -10 }
+        };
+        let scheduledAlarms = new Map();
+
+        // Vedic month names
+        const VEDIC_MONTHS = [
+            'Chaitra', 'Vaiśākha', 'Jyeṣṭha', 'Āṣāḍha',
+            'Śrāvaṇa', 'Bhādrapada', 'Āśvina', 'Kārtika',
+            'Mārgaśīrṣa', 'Pauṣa', 'Māgha', 'Phālguna'
+        ];
+
+        // Equation of Time approximation (minutes)
+        function equationOfTime(dayOfYear) {
+            const B = 2 * Math.PI * (dayOfYear - 81) / 365;
+            return 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+        }
+
+        // Solar declination (corrected formula)
+        function solarDeclination(dayOfYear) {
+            return 23.45 * Math.sin(2 * Math.PI * (284 + dayOfYear) / 365);
+        }
+
+        // Calculate sunrise/sunset
+        function calculateSunTimes(date) {
+            const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+            const declination = solarDeclination(dayOfYear) * Math.PI / 180;
+            const latRad = LATITUDE * Math.PI / 180;
+            
+            const hourAngle = Math.acos(-Math.tan(latRad) * Math.tan(declination));
+            const eot = equationOfTime(dayOfYear);
+            
+            // Solar noon in UTC minutes from midnight
+            const solarNoonUTC = 12 * 60 - (LONGITUDE / 15) * 60 + eot;
+            
+            // Convert to NZST (UTC+12) or NZDT (UTC+13)
+            const isNZDT = isDST(date);
+            const timezoneOffset = isNZDT ? 13 * 60 : 12 * 60;
+            const solarNoon = solarNoonUTC + timezoneOffset;
+            
+            // Convert hour angle to minutes
+            const hourAngleMinutes = hourAngle * 180 / Math.PI * 4;
+            
+            const sunrise = solarNoon - hourAngleMinutes;
+            const sunset = solarNoon + hourAngleMinutes;
+            
+            return {
+                sunrise: sunrise,
+                sunset: sunset,
+                solarNoon: solarNoon
+            };
+        }
+
+        // Check if date is in NZDT (Daylight Saving Time)
+        function isDST(date) {
+            const year = date.getFullYear();
+            const dstStart = getLastSundayOfMonth(year, 8); // Last Sunday in September
+            const dstEnd = getFirstSundayOfMonth(year, 3); // First Sunday in April
+            
+            return date >= dstStart && date < dstEnd;
+        }
+
+        function getLastSundayOfMonth(year, month) {
+            const lastDay = new Date(year, month + 1, 0);
+            const day = lastDay.getDay();
+            return new Date(year, month, lastDay.getDate() - day, 2, 0, 0);
+        }
+
+        function getFirstSundayOfMonth(year, month) {
+            const firstDay = new Date(year, month, 1);
+            const day = firstDay.getDay();
+            const firstSunday = day === 0 ? 1 : 8 - day;
+            return new Date(year, month, firstSunday, 3, 0, 0);
+        }
+
+        // Convert minutes to time string
+        function minutesToTime(minutes) {
+            // Handle negative minutes (previous day)
+            while (minutes < 0) {
+                minutes += 24 * 60;
+            }
+            // Handle minutes over 24 hours (next day)
+            while (minutes >= 24 * 60) {
+                minutes -= 24 * 60;
+            }
+            
+            const hours = Math.floor(minutes / 60);
+            const mins = Math.floor(minutes % 60);
+            return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+        }
+
+        // Calculate sandhya times
+        function calculateSandhyaTimes(date) {
+            const sunTimes = calculateSunTimes(date);
+            
+            return {
+                pratah: {
+                    start: minutesToTime(sunTimes.sunrise - 48),
+                    end: minutesToTime(sunTimes.sunrise + 24)
+                },
+                madhyahna: {
+                    start: minutesToTime(sunTimes.solarNoon - 12),
+                    end: minutesToTime(sunTimes.solarNoon + 12)
+                },
+                sayam: {
+                    start: minutesToTime(sunTimes.sunset - 24),
+                    end: minutesToTime(sunTimes.sunset + 48)
+                }
+            };
+        }
+
+        // Get current sandhya period
+        function getCurrentSandhyaPeriod() {
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const sunTimes = calculateSunTimes(now);
+            
+            // Check Pratah Sandhya
+            if (currentMinutes >= sunTimes.sunrise - 48 && currentMinutes <= sunTimes.sunrise + 24) {
+                return 'pratah';
+            }
+            // Check Madhyahna Sandhya
+            if (currentMinutes >= sunTimes.solarNoon - 12 && currentMinutes <= sunTimes.solarNoon + 12) {
+                return 'madhyahna';
+            }
+            // Check Sayam Sandhya
+            if (currentMinutes >= sunTimes.sunset - 24 && currentMinutes <= sunTimes.sunset + 48) {
+                return 'sayam';
+            }
+            
+            return null;
+        }
+
+        // Get Vedic date approximation
+        function getVedicDate(date) {
+            const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+            const lunarMonth = Math.floor((dayOfYear + 80) / 30) % 12;
+            const tithi = ((dayOfYear + 80) % 30) + 1;
+            
+            return `${VEDIC_MONTHS[lunarMonth]} ${Math.floor(tithi)}`;
+        }
+
+        // Update all times
+        function updateAllTimes() {
+            const now = new Date();
+            const times = calculateSandhyaTimes(now);
+            
+            // Update current date and time
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-NZ', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            document.getElementById('vedicDate').textContent = getVedicDate(now);
+            
+            // Update times
+            document.getElementById('pratahTime').textContent = `${times.pratah.start} - ${times.pratah.end}`;
+            document.getElementById('madhyahnaTime').textContent = `${times.madhyahna.start} - ${times.madhyahna.end}`;
+            document.getElementById('sayamTime').textContent = `${times.sayam.start} - ${times.sayam.end}`;
+            
+            // Highlight current period
+            const currentPeriod = getCurrentSandhyaPeriod();
+            document.querySelectorAll('.sandhya-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            if (currentPeriod) {
+                document.getElementById(currentPeriod).classList.add('active');
+            }
+            
+            // Update next refresh time
+            const nextUpdate = new Date(now.getTime() + 60000);
+            document.getElementById('nextUpdate').textContent = `Next update: ${nextUpdate.toLocaleTimeString('en-NZ')}`;
+
+            // Update alarms
+            scheduleAlarms();
+        }
+
+        // Request notification permission
+        function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                alert('This browser does not support notifications');
+                return;
+            }
+
+            Notification.requestPermission().then(permission => {
+                updateNotificationStatus();
+                if (permission === 'granted') {
+                    scheduleAlarms();
+                }
+            });
+        }
+
+        // Update notification status display
+        function updateNotificationStatus() {
+            const status = document.getElementById('notificationStatus');
+            if (!('Notification' in window)) {
+                status.textContent = 'Notifications not supported';
+                status.className = 'notification-status denied';
+                return;
+            }
+
+            const permission = Notification.permission;
+            if (permission === 'granted') {
+                status.textContent = '✅ Notifications enabled';
+                status.className = 'notification-status granted';
+            } else if (permission === 'denied') {
+                status.textContent = '❌ Notifications blocked';
+                status.className = 'notification-status denied';
+            } else {
+                status.textContent = '⚠️ Click "Enable Notifications" above';
+                status.className = 'notification-status default';
+            }
+        }
+
+        // Toggle alarm on/off
+        function toggle
